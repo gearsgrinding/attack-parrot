@@ -9,6 +9,7 @@
 '''
 
 import sys, os,platform
+import serial 
 import cv2
 import numpy as np
 from file_methods import Persistent_Dict
@@ -121,7 +122,7 @@ class Marker_Detector(Plugin):
     def update(self,frame,recent_pupil_positions,events):
         img = frame.img
         self.img_shape = frame.img.shape
-
+        
         if self.robust_detection.value:
             self.markers = detect_markers_robust(img,
                                                 grid_size = 5,
@@ -158,6 +159,9 @@ class Marker_Detector(Plugin):
                     pos = normalize(pos,(self.img_shape[1],self.img_shape[0]),flip_y=True)
                     new_pos =  s.img_to_ref_surface(np.array(pos))
                     s.move_vertex(v_idx,new_pos)
+                   
+
+
 
         #map recent gaze onto detected surfaces used for pupil server
         for s in self.surfaces:
@@ -167,7 +171,12 @@ class Marker_Detector(Plugin):
                     if p['norm_pupil'] is not None:
                         gp_on_s = tuple(s.img_to_ref_surface(np.array(p['norm_gaze'])))
                         p['realtime gaze on '+s.name] = gp_on_s
+                        print gp_on_s
+                        ser = serial.Serial('/dev/tty.usbserial', 9600)
+                        
                         s.gaze_on_srf.append(gp_on_s)
+                      
+
 
 
         #allow surfaces to open/close windows
@@ -186,6 +195,7 @@ class Marker_Detector(Plugin):
             hat = np.array([[[0,0],[0,1],[.5,1.3],[1,1],[1,0],[0,0]]],dtype=np.float32)
             hat = cv2.perspectiveTransform(hat,m_marker_to_screen(m))
             draw_gl_polyline(hat.reshape((6,2)),(0.1,1.,1.,.5))
+
 
         for s in self.surfaces:
             s.gl_draw_frame()
