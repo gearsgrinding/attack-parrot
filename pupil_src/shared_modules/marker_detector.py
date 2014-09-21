@@ -172,8 +172,9 @@ class Marker_Detector(Plugin):
                         gp_on_s = tuple(s.img_to_ref_surface(np.array(p['norm_gaze'])))
                         p['realtime gaze on '+s.name] = gp_on_s
                         print gp_on_s
-                        ser = serial.Serial('/dev/tty.usbserial', 9600)
-                        
+                        ser = serial.Serial('/dev/ttyACM0', 9600)
+                        ser.write("hello world");
+                        print(ser.read())
                         s.gaze_on_srf.append(gp_on_s)
                       
 
